@@ -21,6 +21,7 @@ class TestGrpcReflection < Minitest::Test
 
   def after_all
     Process.kill(:TERM, @server_pid)
+    Process.wait(@server_pid)
   end
 
   def test_list_service
