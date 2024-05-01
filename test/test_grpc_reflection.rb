@@ -19,8 +19,8 @@ class TestGrpcReflection < Minitest::Test
     sleep 0.5
   end
 
-  def afer_all
-    Process.kill(@server_pid, :TERM)
+  def after_all
+    Process.kill(:TERM, @server_pid)
   end
 
   def test_list_service
