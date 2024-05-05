@@ -5,7 +5,4 @@ require_relative "grpc_reflection/file_descriptor_manager"
 require_relative "grpc_reflection/protobuf_ext"
 require_relative "grpc_reflection/server"
 
-module GrpcReflection
-  class Error < StandardError; end
-  # Your code goes here...
-end
+module GrpcReflection; end
