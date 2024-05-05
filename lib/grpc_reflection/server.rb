@@ -7,7 +7,7 @@ class GrpcReflection::Server < Grpc::Reflection::V1::ServerReflection::Service
 
     res = Grpc::Reflection::V1::ServerReflectionResponse.new
     # TODO: implement another responses
-    if request.list_services == "*"
+    if request.list_services.size != 0
       res.list_services_response = Grpc::Reflection::V1::ListServiceResponse.new(service: list_services_response)
     elsif !request.file_containing_symbol.empty?
       result = GrpcReflection::FileDescriptorManager.select(request.file_containing_symbol)
