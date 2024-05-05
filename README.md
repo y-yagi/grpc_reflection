@@ -1,24 +1,38 @@
-# GrpcReflection
+# GRPC::Reflection
 
-TODO: Delete this and the text below, and describe your gem
+[![CI](https://github.com/y-yagi/grpc_reflection/workflows/Ruby/badge.svg)](https://github.com/y-yagi/grpc_reflection/actions/workflows/main.yml)
+[![Gem Version](https://badge.fury.io/rb/grpc_reflection.svg)](http://badge.fury.io/rb/grpc_reflection)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/grpc_reflection`. To experiment with that code, run `bin/console` for an interactive prompt.
+This gem aims to provide GRPC Server Reflection Protocol for Ruby. The main purpose is to allow using [grpcurl](https://github.com/fullstorydev/grpcurl).
+
+Currently, only supports requests by　`file_containing_symbol` and `list_services`.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'grpc_reflection'
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+    $ bundle
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Or install it yourself as:
+
+    $ gem install grpc_reflection
 
 ## Usage
 
-TODO: Write usage instructions here
+This gem provies the server for GRPC Server Reflection Protocol. Please add it to your GRPC server.
+
+```ruby
+s = GRPC::RpcServer.new
+s.add_http2_port('0.0.0.0:50051', :this_port_is_insecure)
+s.handle(GrpcReflection::Server)
+s.run_till_terminated_or_interrupted([1, 'int', 'SIGTERM'])
+```
 
 ## Development
 
@@ -28,7 +42,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/grpc_reflection.
+Bug reports and pull requests are welcome on GitHub at https://github.com/y-yagi/grpc_reflection.
 
 ## License
 
