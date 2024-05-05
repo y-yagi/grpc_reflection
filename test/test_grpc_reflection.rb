@@ -32,4 +32,14 @@ class TestGrpcReflection < Minitest::Test
     assert_equal 2, response.list_services_response.service.count
     assert_equal ["grpc.reflection.v1.ServerReflection", "helloworld.Greeter"], response.list_services_response.service.map {|s| s.name }.sort
   end
+
+  def test_file_containing_symbol
+    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_containing_symbol: "helloworld.Greeter")
+    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
+    response = stub.server_reflection_info([request]).first
+
+    assert response.file_descriptor_response
+    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+    assert_equal "test/protos/helloworld.proto", parsed.name
+  end
 end
