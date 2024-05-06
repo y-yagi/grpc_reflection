@@ -8,6 +8,7 @@ module GrpcReflection
 
     class << self
       def add(filename:, descriptor:, services:, package:)
+        descriptor = descriptor.b
         services.each do |s|
           converted_service = JSON.parse(s.to_json)
           @@proto_files[package + "." + converted_service["name"]] = descriptor
