@@ -3,6 +3,7 @@ require_relative "reflection/v1/reflection_services_pb"
 
 class GrpcReflection::Server < Grpc::Reflection::V1::ServerReflection::Service
   def server_reflection_info(req, _unused_call)
+    # TODO: support streaming call
     request = req.first
 
     res = Grpc::Reflection::V1::ServerReflectionResponse.new
