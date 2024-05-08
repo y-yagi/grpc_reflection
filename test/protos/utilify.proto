@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package utility;
+
+import "google/protobuf/timestamp.proto";
+
+service Clock {
+  rpc Now(ClockRequest) returns (ClockReply) {}
+}
+
+message ClockRequest {
+}
+
+message ClockReply {
+  google.protobuf.Timestamp time = 1;
+}

@@ -6,9 +6,11 @@ $LOAD_PATH.unshift File.expand_path("..", __dir__)
 require "bundler/setup"
 require "grpc_reflection"
 require_relative "../test/protos/greeter_server"
+require_relative "../test/protos/utility_server"
 
 s = GRPC::RpcServer.new
 s.add_http2_port('0.0.0.0:50051', :this_port_is_insecure)
 s.handle(GrpcReflection::Server)
 s.handle(GreeterServer)
+s.handle(UtilityServer)
 s.run_till_terminated_or_interrupted([1, 'int', 'SIGTERM'])
