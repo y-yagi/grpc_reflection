@@ -1,25 +1,17 @@
 # frozen_string_literal: true
 
-require "json"
-
 module GrpcReflection
   module FileDescriptorManager
-    @@proto_files = {}
+    @@file_descriptors = []
 
     class << self
-      def add(filename:, descriptor:, services:, package:)
-        descriptor = descriptor.b
-        services.each do |s|
-          converted_service = JSON.parse(s.to_json)
-          @@proto_files[package + "." + converted_service["name"]] = descriptor
-          converted_service["method"].each do |m|
-            @@proto_files[package + "." + converted_service["name"] + "." + m["name"]] = descriptor
-          end
-        end
+      def add(descriptor)
+        @@file_descriptors << GrpcReflection::FileDescriptor.new(descriptor)
       end
 
       def select(name)
-        [@@proto_files[name]].compact
+        file_descriptor = @@file_descriptors.detect { |f| f.service_and_method_names[name] }
+        [file_descriptor&.descriptor_data].compact
       end
     end
   end

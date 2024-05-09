@@ -6,8 +6,7 @@ module GrpcReflection
     module DescriptorPool
       def add_serialized_file(descriptor_data)
         begin
-          parsed = Google::Protobuf::FileDescriptorProto.decode(descriptor_data)
-          GrpcReflection::FileDescriptorManager.add(filename: parsed.name, descriptor: descriptor_data, services: parsed.service, package: parsed.package)
+          GrpcReflection::FileDescriptorManager.add(descriptor_data)
         rescue => e
           $stderr.puts "[grpc-reflection] parsing descriptor data is failed #{e.message}"
         end
