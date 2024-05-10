@@ -4,12 +4,13 @@ require "json"
 
 module GrpcReflection
   class FileDescriptor
-    attr_reader :service_and_method_names, :descriptor_data
+    attr_reader :service_and_method_names, :descriptor_data, :filename, :dependency
 
     def initialize(descriptor_data)
       @file_descriptor_proto = Google::Protobuf::FileDescriptorProto.decode(descriptor_data)
       @descriptor_data = descriptor_data.b
       @filename = @file_descriptor_proto.name
+      @dependency = @file_descriptor_proto.dependency || []
       @service_and_method_names = {}
 
       set_service_and_method_names

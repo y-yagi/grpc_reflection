@@ -2,6 +2,7 @@
 
 require "test_helper"
 require_relative "../test/protos/greeter_server"
+require_relative "../test/protos/utility_server"
 
 class TestGrpcReflection < Minitest::Test
   include Minitest::Hooks
@@ -13,6 +14,7 @@ class TestGrpcReflection < Minitest::Test
       s.add_http2_port(@hostname, :this_port_is_insecure)
       s.handle(GrpcReflection::Server)
       s.handle(GreeterServer)
+      s.handle(UtilityServer)
       s.run_till_terminated_or_interrupted([1, "int", "SIGTERM"])
     end
 
@@ -29,8 +31,8 @@ class TestGrpcReflection < Minitest::Test
     stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
     response = stub.server_reflection_info([request]).first
 
-    assert_equal 2, response.list_services_response.service.count
-    assert_equal ["grpc.reflection.v1.ServerReflection", "helloworld.Greeter"], response.list_services_response.service.map {|s| s.name }.sort
+    assert_equal 3, response.list_services_response.service.count
+    assert_equal ["grpc.reflection.v1.ServerReflection", "helloworld.Greeter", "utility.Clock"], response.list_services_response.service.map {|s| s.name }.sort
   end
 
   def test_file_containing_symbol_by_service_name
@@ -41,6 +43,16 @@ class TestGrpcReflection < Minitest::Test
     assert response.file_descriptor_response
     parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
     assert_equal "test/protos/helloworld.proto", parsed.name
+  end
+
+  def test_file_containing_symbol_that_using_import
+    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_containing_symbol: "utility.Clock")
+    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
+    response = stub.server_reflection_info([request]).first
+
+    assert response.file_descriptor_response
+    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+    assert_equal "test/protos/utilify.proto", parsed.name
   end
 
   def test_file_containing_symbol_by_method_name
