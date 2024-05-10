@@ -3,6 +3,11 @@ syntax = "proto3";
 package utility;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+  string my_option = 50001;
+}
 
 service Clock {
   rpc Now(ClockRequest) returns (ClockReply) {}

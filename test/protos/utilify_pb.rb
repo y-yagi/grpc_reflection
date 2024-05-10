@@ -5,9 +5,10 @@
 require 'google/protobuf'
 
 require 'google/protobuf/timestamp_pb'
+require 'google/protobuf/descriptor_pb'
 
 
-descriptor_data = "\n\x19test/protos/utilify.proto\x12\x07utility\x1a\x1fgoogle/protobuf/timestamp.proto\"\x0e\n\x0c\x43lockRequest\"6\n\nClockReply\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2<\n\x05\x43lock\x12\x33\n\x03Now\x12\x15.utility.ClockRequest\x1a\x13.utility.ClockReply\"\x00\x62\x06proto3"
+descriptor_data = "\n\x19test/protos/utilify.proto\x12\x07utility\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/descriptor.proto\"\x0e\n\x0c\x43lockRequest\"6\n\nClockReply\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2<\n\x05\x43lock\x12\x33\n\x03Now\x12\x15.utility.ClockRequest\x1a\x13.utility.ClockReply\"\x00:3\n\tmy_option\x12\x1e.google.protobuf.MethodOptions\x18\xd1\x86\x03 \x01(\tb\x06proto3"
 
 pool = Google::Protobuf::DescriptorPool.generated_pool
 

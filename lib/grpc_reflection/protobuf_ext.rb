@@ -18,3 +18,4 @@ module GrpcReflection
 end
 
 Google::Protobuf::DescriptorPool.prepend(GrpcReflection::ProtobufExt::DescriptorPool)
+GrpcReflection::FileDescriptorManager.load_protos_provided_by_protobuf
