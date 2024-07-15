@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "google/protobuf/descriptor_pb"
 
 module GrpcReflection
   class FileDescriptor
