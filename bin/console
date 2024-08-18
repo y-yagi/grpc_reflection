@@ -4,6 +4,7 @@
 $LOAD_PATH.unshift File.expand_path("..", __dir__)
 
 require "bundler/setup"
+require "debug"
 require "grpc_reflection"
 require_relative "../test/protos/greeter_server"
 require_relative "../test/protos/utility_server"
