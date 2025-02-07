@@ -4,7 +4,7 @@ require "json"
 require "google/protobuf/descriptor_pb"
 
 module GrpcReflection
-  class FileDescriptor
+  class FileDescriptorDecorator
     attr_reader :service_and_method_names, :descriptor_data, :filename, :dependency
 
     def initialize(descriptor_data)

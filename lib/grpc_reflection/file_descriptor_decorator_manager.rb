@@ -2,15 +2,15 @@
 
 module GrpcReflection
   module FileDescriptorManager
-    @@file_descriptors = []
+    @@file_descriptor_decorators = []
 
     class << self
       def add(descriptor)
-        @@file_descriptors << GrpcReflection::FileDescriptor.new(descriptor)
+        @@file_descriptor_decorators << GrpcReflection::FileDescriptorDecorator.new(descriptor)
       end
 
       def select(name)
-        file_descriptor = @@file_descriptors.detect { |f| f.service_and_method_names[name] }
+        file_descriptor = @@file_descriptor_decorators.detect { |f| f.service_and_method_names[name] }
         return [] if file_descriptor.nil?
 
         result = {}
@@ -18,7 +18,7 @@ module GrpcReflection
         dependencies = file_descriptor.dependency.dup
         until dependencies.empty?
           dependency = dependencies.shift
-          dependent_file_descriptor = @@file_descriptors.detect { |f| f.filename == dependency }
+          dependent_file_descriptor = @@file_descriptor_decorators.detect { |f| f.filename == dependency }
           dependencies.push(*dependent_file_descriptor.dependency)
           result[dependent_file_descriptor.filename] = dependent_file_descriptor.descriptor_data
         end
