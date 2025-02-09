@@ -11,7 +11,7 @@ class GrpcReflection::Server < Grpc::Reflection::V1::ServerReflection::Service
     if request.list_services.size != 0
       res.list_services_response = Grpc::Reflection::V1::ListServiceResponse.new(service: list_services_response)
     elsif !request.file_containing_symbol.empty?
-      result = GrpcReflection::FileDescriptorManager.select(request.file_containing_symbol)
+      result = GrpcReflection::FileDescriptorManager.find(request.file_containing_symbol)
       res.file_descriptor_response = Grpc::Reflection::V1::FileDescriptorResponse.new(file_descriptor_proto: result)
     end
     [res].enum_for(:each)
