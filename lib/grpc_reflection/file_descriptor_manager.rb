@@ -6,7 +6,9 @@ module GrpcReflection
 
     class << self
       def add(file_descriptor_proto)
-        @@file_descriptor_decorators << GrpcReflection::FileDescriptorDecorator.new(file_descriptor_proto)
+        decorator = GrpcReflection::FileDescriptorDecorator.new(file_descriptor_proto)
+        @@file_descriptor_decorators << decorator
+        decorator
       end
 
       def find(name)
@@ -18,10 +20,14 @@ module GrpcReflection
         dependencies = file_descriptor.dependency.dup
         until dependencies.empty?
           dependency = dependencies.shift
-          dependent_file_descriptor = @@file_descriptor_decorators.detect { |f| f.filename == dependency }
-          if dependent_file_descriptor
-            dependencies.push(*dependent_file_descriptor.dependency)
-            result[dependent_file_descriptor.filename] = dependent_file_descriptor.descriptor_data
+          decorated_file_descriptor = @@file_descriptor_decorators.detect { |f| f.filename == dependency }
+          if decorated_file_descriptor.nil? && proto = Google::Protobuf::DescriptorPool.generated_pool.lookup(dependency)&.to_proto
+            decorated_file_descriptor = add(proto)
+          end
+
+          if decorated_file_descriptor
+            dependencies.push(*decorated_file_descriptor.dependency)
+            result[decorated_file_descriptor.filename] = decorated_file_descriptor.serialized_file
           end
         end
 
