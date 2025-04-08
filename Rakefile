@@ -9,6 +9,13 @@ Minitest::TestTask.create do |t|
   t.verbose = true
 end
 
+# For this task to work, you need to have the reflection protos in a directory. You can find these
+# here: https://github.com/grpc/grpc/tree/master/src/proto/grpc/reflection
+# Add folders `v1` and `v1alpha` as shown in the tree above, then set `PROTO_DIR` to that
+# directory and you can then run this task.
+# Please note that the already-generated code likely does not need to be re-generated
+# since these protos are extremely unlikely to change, so this task most likely does not
+# need to be run.
 task :update_code_generated_by_protoc do
   proto_dir = ENV.fetch("PROTO_DIR")
   Dir.chdir(proto_dir) do
