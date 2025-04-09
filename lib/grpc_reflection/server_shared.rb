@@ -9,7 +9,7 @@ module GrpcReflection
       if request.list_services.size != 0
         res.list_services_response = proto_module::ListServiceResponse.new(service: list_services_response(proto_module))
       elsif !request.file_containing_symbol.empty?
-        result = GrpcReflection::FileDescriptorManager.find(request.file_containing_symbol)
+        result = GrpcReflection::FileDescriptorManager.select(request.file_containing_symbol)
         res.file_descriptor_response = proto_module::FileDescriptorResponse.new(file_descriptor_proto: result)
       elsif !request.file_by_filename.empty?
 
