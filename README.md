@@ -37,6 +37,12 @@ s.handle(GrpcReflection::Server)
 s.run_till_terminated_or_interrupted([1, 'int', 'SIGTERM'])
 ```
 
+If you want to use v1 alpha, please use `GrpcReflection::ServerAlpha`.
+
+```ruby
+s.handle(GrpcReflection::ServerAlpha)
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
