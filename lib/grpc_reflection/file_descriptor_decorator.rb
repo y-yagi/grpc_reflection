@@ -5,13 +5,12 @@ require "google/protobuf/descriptor_pb"
 
 module GrpcReflection
   class FileDescriptorDecorator
-    attr_reader :service_and_method_names, :serialized_file, :filename, :dependency
+    attr_reader :service_and_method_names, :descriptor_data, :filename, :dependency
 
-    def initialize(file_descriptor_proto)
-      @file_descriptor_proto = file_descriptor_proto
-      @serialized_file = Google::Protobuf::FileDescriptorProto.encode(@file_descriptor_proto)
+    def initialize(descriptor_data)
+      @file_descriptor_proto = Google::Protobuf::FileDescriptorProto.decode(descriptor_data)
+      @descriptor_data = descriptor_data.b
       @filename = @file_descriptor_proto.name
-
       @dependency = @file_descriptor_proto.dependency || []
       @service_and_method_names = {}
 
