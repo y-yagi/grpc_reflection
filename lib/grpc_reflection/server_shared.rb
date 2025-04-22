@@ -11,8 +11,6 @@ module GrpcReflection
       elsif !request.file_containing_symbol.empty?
         result = GrpcReflection::FileDescriptorManager.select(request.file_containing_symbol)
         res.file_descriptor_response = proto_module::FileDescriptorResponse.new(file_descriptor_proto: result)
-      elsif !request.file_by_filename.empty?
-
       end
       [res].enum_for(:each)
     end
