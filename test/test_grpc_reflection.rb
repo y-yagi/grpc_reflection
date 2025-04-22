@@ -65,8 +65,20 @@ class TestGrpcReflection < Minitest::Test
     response = stub.server_reflection_info([request]).first
 
     assert response.file_descriptor_response
+
     parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
     assert_equal "test/protos/helloworld.proto", parsed.name
+  end
+
+  def test_file_by_filename
+    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_by_filename: "google/protobuf/timestamp.proto")
+    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
+    response = stub.server_reflection_info([request]).first
+
+    assert response.file_descriptor_response
+
+    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+    assert_equal "google/protobuf/timestamp.proto", parsed.name
   end
 
   # v1 Alpha
@@ -111,4 +123,14 @@ class TestGrpcReflection < Minitest::Test
     assert_equal "test/protos/helloworld.proto", parsed.name
   end
 
+  def test_file_by_filename_alpha
+    request = Grpc::Reflection::V1alpha::ServerReflectionRequest.new(file_by_filename: "google/protobuf/timestamp.proto")
+    stub = Grpc::Reflection::V1alpha::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
+    response = stub.server_reflection_info([request]).first
+
+    assert response.file_descriptor_response
+
+    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+    assert_equal "google/protobuf/timestamp.proto", parsed.name
+  end
 end
