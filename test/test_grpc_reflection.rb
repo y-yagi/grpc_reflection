@@ -65,6 +65,7 @@ class TestGrpcReflection < Minitest::Test
     response = stub.server_reflection_info([request]).first
 
     assert response.file_descriptor_response
+
     parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
     assert_equal "test/protos/helloworld.proto", parsed.name
   end
