@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "GRPC Server Reflection Protocol for Ruby"
   spec.homepage = "https://github.com/y-yagi/grpc_reflection"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.0.0"
+  spec.required_ruby_version = ">= 3.1.0"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["rubygems_mfa_required"] = "true"
 
