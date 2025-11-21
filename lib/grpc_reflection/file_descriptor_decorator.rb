@@ -24,6 +24,8 @@ module GrpcReflection
         @service_and_method_names[@file_descriptor_proto.package + "." + converted_service["name"]] = true
         converted_service["method"].each do |m|
           @service_and_method_names[@file_descriptor_proto.package + "." + converted_service["name"] + "." + m["name"]] = true
+          @service_and_method_names[m["inputType"][1..]] = true
+          @service_and_method_names[m["outputType"][1..]] = true
         end
       end
     end
