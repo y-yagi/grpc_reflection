@@ -22,6 +22,9 @@ class TestGrpcReflection < Minitest::Test
       s.run_till_terminated_or_interrupted([1, "int", "SIGTERM"])
     end
 
+    @versions = %i[v1 v1alpha]
+    @requests = {v1: Grpc::Reflection::V1::ServerReflectionRequest, v1alpha: Grpc::Reflection::V1alpha::ServerReflectionRequest}
+    @stubs = {v1: Grpc::Reflection::V1::ServerReflection::Stub, v1alpha: Grpc::Reflection::V1alpha::ServerReflection::Stub}
     sleep 0.5
   end
 
@@ -31,106 +34,63 @@ class TestGrpcReflection < Minitest::Test
   end
 
   def test_list_service
-    request = Grpc::Reflection::V1::ServerReflectionRequest.new(list_services: "*")
-    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
+    @versions.each do |version|
+      request = @requests[version].new(list_services: "*")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
 
-    assert_equal 4, response.list_services_response.service.count
-    assert_equal ["grpc.reflection.v1.ServerReflection", "grpc.reflection.v1alpha.ServerReflection", "helloworld.Greeter", "utility.Clock"], response.list_services_response.service.map {|s| s.name }.sort
+      assert_equal 4, response.list_services_response.service.count
+      assert_equal ["grpc.reflection.v1.ServerReflection", "grpc.reflection.v1alpha.ServerReflection", "helloworld.Greeter", "utility.Clock"], response.list_services_response.service.map {|s| s.name }.sort
+    end
   end
 
   def test_file_containing_symbol_by_service_name
-    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_containing_symbol: "helloworld.Greeter")
-    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "helloworld.Greeter")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
 
-    assert response.file_descriptor_response
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "test/protos/helloworld.proto", parsed.name
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/helloworld.proto", parsed.name
+    end
   end
 
   def test_file_containing_symbol_that_using_import
-    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_containing_symbol: "utility.Clock")
-    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "utility.Clock")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
 
-    assert response.file_descriptor_response
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "test/protos/utilify.proto", parsed.name
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/utilify.proto", parsed.name
+    end
   end
 
   def test_file_containing_symbol_by_method_name
-    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_containing_symbol: "helloworld.Greeter.SayHello")
-    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "helloworld.Greeter.SayHello")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
 
-    assert response.file_descriptor_response
+      assert response.file_descriptor_response
 
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "test/protos/helloworld.proto", parsed.name
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/helloworld.proto", parsed.name
+    end
   end
 
   def test_file_by_filename
-    request = Grpc::Reflection::V1::ServerReflectionRequest.new(file_by_filename: "google/protobuf/timestamp.proto")
-    stub = Grpc::Reflection::V1::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
+    @versions.each do |version|
+      request = @requests[version].new(file_by_filename: "google/protobuf/timestamp.proto")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
 
-    assert response.file_descriptor_response
+      assert response.file_descriptor_response
 
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "google/protobuf/timestamp.proto", parsed.name
-  end
-
-  # v1 Alpha
-
-  def test_list_service_alpha
-    request = Grpc::Reflection::V1alpha::ServerReflectionRequest.new(list_services: "*")
-    stub = Grpc::Reflection::V1alpha::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
-
-    assert_equal 4, response.list_services_response.service.count
-    assert_equal ["grpc.reflection.v1.ServerReflection", "grpc.reflection.v1alpha.ServerReflection", "helloworld.Greeter", "utility.Clock"], response.list_services_response.service.map {|s| s.name }.sort
-  end
-
-  def test_file_containing_symbol_by_service_name_alpha
-    request = Grpc::Reflection::V1alpha::ServerReflectionRequest.new(file_containing_symbol: "helloworld.Greeter")
-    stub = Grpc::Reflection::V1alpha::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
-
-    assert response.file_descriptor_response
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "test/protos/helloworld.proto", parsed.name
-  end
-
-  def test_file_containing_symbol_that_using_import_alpha
-    request = Grpc::Reflection::V1alpha::ServerReflectionRequest.new(file_containing_symbol: "utility.Clock")
-    stub = Grpc::Reflection::V1alpha::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
-
-    assert response.file_descriptor_response
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "test/protos/utilify.proto", parsed.name
-  end
-
-  def test_file_containing_symbol_by_method_name_alpha
-    request = Grpc::Reflection::V1alpha::ServerReflectionRequest.new(file_containing_symbol: "helloworld.Greeter.SayHello")
-    stub = Grpc::Reflection::V1alpha::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
-
-    assert response.file_descriptor_response
-
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "test/protos/helloworld.proto", parsed.name
-  end
-
-  def test_file_by_filename_alpha
-    request = Grpc::Reflection::V1alpha::ServerReflectionRequest.new(file_by_filename: "google/protobuf/timestamp.proto")
-    stub = Grpc::Reflection::V1alpha::ServerReflection::Stub.new(@hostname, :this_channel_is_insecure)
-    response = stub.server_reflection_info([request]).first
-
-    assert response.file_descriptor_response
-
-    parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
-    assert_equal "google/protobuf/timestamp.proto", parsed.name
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "google/protobuf/timestamp.proto", parsed.name
+    end
   end
 end
