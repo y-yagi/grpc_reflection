@@ -93,4 +93,16 @@ class TestGrpcReflection < Minitest::Test
       assert_equal "google/protobuf/timestamp.proto", parsed.name
     end
   end
+
+  def test_file_containing_symbol_by_message_name
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "helloworld.HelloRequest")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/helloworld.proto", parsed.name
+    end
+  end
 end
