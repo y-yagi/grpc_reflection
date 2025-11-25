@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 require "json"
+require "set"
 require "google/protobuf/descriptor_pb"
 
 module GrpcReflection
   class FileDescriptorDecorator
-    attr_reader :service_and_method_names, :serialized_file, :filename, :dependency
+    attr_reader :dataset, :serialized_file, :filename, :dependency
 
     def initialize(file_descriptor_proto)
       @file_descriptor_proto = file_descriptor_proto
@@ -13,19 +14,21 @@ module GrpcReflection
       @filename = @file_descriptor_proto.name
 
       @dependency = @file_descriptor_proto.dependency || []
-      @service_and_method_names = {}
+      @dataset = Set.new
 
-      set_service_and_method_names
+      set_dataset
     end
 
-    def set_service_and_method_names
+    private
+
+    def set_dataset
       @file_descriptor_proto.service.each do |s|
         converted_service = JSON.parse(s.to_json)
-        @service_and_method_names[@file_descriptor_proto.package + "." + converted_service["name"]] = true
+        @dataset.add(@file_descriptor_proto.package + "." + converted_service["name"])
         converted_service["method"].each do |m|
-          @service_and_method_names[@file_descriptor_proto.package + "." + converted_service["name"] + "." + m["name"]] = true
-          @service_and_method_names[m["inputType"][1..]] = true
-          @service_and_method_names[m["outputType"][1..]] = true
+          @dataset.add(@file_descriptor_proto.package + "." + converted_service["name"] + "." + m["name"])
+          @dataset.add(m["inputType"][1..])
+          @dataset.add(m["outputType"][1..])
         end
       end
     end

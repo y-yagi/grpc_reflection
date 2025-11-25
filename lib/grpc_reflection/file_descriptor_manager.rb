@@ -37,7 +37,7 @@ module GrpcReflection
       private
 
       def find_file_descriptor(name)
-        file_descriptor = @@file_descriptor_decorators.detect { |f| f.service_and_method_names[name] }
+        file_descriptor = @@file_descriptor_decorators.detect { |f| f.dataset.include?(name) }
         return file_descriptor if file_descriptor
 
         search_name = name
@@ -51,7 +51,7 @@ module GrpcReflection
         return nil if file_descriptor_proto.nil?
 
         add(file_descriptor_proto)
-        @@file_descriptor_decorators.detect { |f| f.service_and_method_names[name] }
+        @@file_descriptor_decorators.detect { |f| f.dataset.include?(name) }
       end
     end
   end
