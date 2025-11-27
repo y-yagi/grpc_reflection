@@ -10,30 +10,8 @@ require 'google/protobuf/descriptor_pb'
 
 descriptor_data = "\n\x19test/protos/utilify.proto\x12\x07utility\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/descriptor.proto\"\x0e\n\x0c\x43lockRequest\"6\n\nClockReply\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2<\n\x05\x43lock\x12\x33\n\x03Now\x12\x15.utility.ClockRequest\x1a\x13.utility.ClockReply\"\x00:3\n\tmy_option\x12\x1e.google.protobuf.MethodOptions\x18\xd1\x86\x03 \x01(\tb\x06proto3"
 
-pool = Google::Protobuf::DescriptorPool.generated_pool
-
-begin
-  pool.add_serialized_file(descriptor_data)
-rescue TypeError
-  # Compatibility code: will be removed in the next major version.
-  require 'google/protobuf/descriptor_pb'
-  parsed = Google::Protobuf::FileDescriptorProto.decode(descriptor_data)
-  parsed.clear_dependency
-  serialized = parsed.class.encode(parsed)
-  file = pool.add_serialized_file(serialized)
-  warn "Warning: Protobuf detected an import path issue while loading generated file #{__FILE__}"
-  imports = [
-    ["google.protobuf.Timestamp", "google/protobuf/timestamp.proto"],
-  ]
-  imports.each do |type_name, expected_filename|
-    import_file = pool.lookup(type_name).file_descriptor
-    if import_file.name != expected_filename
-      warn "- #{file.name} imports #{expected_filename}, but that import was loaded as #{import_file.name}"
-    end
-  end
-  warn "Each proto file must use a consistent fully-qualified name."
-  warn "This will become an error in the next major version."
-end
+pool = ::Google::Protobuf::DescriptorPool.generated_pool
+pool.add_serialized_file(descriptor_data)
 
 module Utility
   ClockRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("utility.ClockRequest").msgclass

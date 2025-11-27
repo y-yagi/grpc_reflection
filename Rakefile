@@ -29,4 +29,20 @@ task :update_code_generated_by_protoc do
   File.write(service_file, File.read(service_file).gsub(/require 'reflection_pb'/, "require_relative 'reflection_pb'"))
 end
 
+desc "Compile proto files for test"
+task :compile_test_protos do
+  test_protos_dir = "test/protos"
+  proto_files = Dir.glob("#{test_protos_dir}/*.proto")
+
+  if proto_files.empty?
+    puts "No proto files found in #{test_protos_dir}"
+    exit 1
+  end
+
+  proto_files.each do |proto_file|
+    puts "  - #{proto_file}"
+    system("bundle exec grpc_tools_ruby_protoc --ruby_out=. --grpc_out=. #{proto_file}", exception: true)
+  end
+end
+
 task default: :test
