@@ -5,7 +5,6 @@ module GrpcReflection
       request = req.first
 
       res = proto_module::ServerReflectionResponse.new
-      # TODO: implement another responses
       if request.list_services.size != 0
         res.list_services_response = proto_module::ListServiceResponse.new(service: list_services_response(proto_module))
       elsif !request.file_containing_symbol.empty?
@@ -22,6 +21,11 @@ module GrpcReflection
         else
           res.file_descriptor_response = proto_module::FileDescriptorResponse.new(file_descriptor_proto: [])
         end
+      elsif !request.all_extension_numbers_of_type.empty?
+        res.error_response = proto_module::ErrorResponse.new(
+          error_code: GRPC::Core::StatusCodes::UNIMPLEMENTED,
+          error_message: "all_extension_numbers_of_type is not implemented"
+        )
       end
       [res].enum_for(:each)
     end

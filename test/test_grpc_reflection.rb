@@ -136,4 +136,15 @@ class TestGrpcReflection < Minitest::Test
       assert_empty response.file_descriptor_response.file_descriptor_proto
     end
   end
+
+  def test_all_extension_numbers_of_type
+    @versions.each do |version|
+      request = @requests[version].new(all_extension_numbers_of_type: ".")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::UNIMPLEMENTED, response.error_response.error_code
+    end
+  end
 end
