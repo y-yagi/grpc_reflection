@@ -4,6 +4,7 @@ package utility;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/descriptor.proto";
+import "test/protos/enum_description_option.proto";
 
 extend google.protobuf.MethodOptions {
   string my_option = 50001;
@@ -18,4 +19,11 @@ message ClockRequest {
 
 message ClockReply {
   google.protobuf.Timestamp time = 1;
+  optional Zone zone = 2;
+
+  enum Zone {
+    UNKNOWN = 0 [(grpc_reflection.enum_description) = "Unknown time zone"];
+    UTC = 1 [(grpc_reflection.enum_description) = "Coordinated Universal Time"];
+    JST = 2 [(grpc_reflection.enum_description) = "Japan Standard Time"];
+  }
 }

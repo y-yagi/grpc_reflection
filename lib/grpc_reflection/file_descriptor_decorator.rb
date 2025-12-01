@@ -31,6 +31,10 @@ module GrpcReflection
           @dataset.add(m["outputType"][1..])
         end
       end
+
+      @file_descriptor_proto.extension.each do |s|
+        @dataset.add(@file_descriptor_proto.package + "." + s.name)
+      end
     end
   end
 end

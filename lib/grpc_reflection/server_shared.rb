@@ -14,6 +14,14 @@ module GrpcReflection
       elsif !request.file_by_filename.empty?
         proto = Google::Protobuf::DescriptorPool.generated_pool.lookup(request.file_by_filename)&.to_proto
         res.file_descriptor_response = proto_module::FileDescriptorResponse.new(file_descriptor_proto: [Google::Protobuf::FileDescriptorProto.encode(proto)])
+      elsif !request.file_containing_extension.nil? && !request.file_containing_extension.containing_type.empty?
+        descriptor = Google::Protobuf::DescriptorPool.generated_pool.lookup(request.file_containing_extension.containing_type)
+        if descriptor.is_a?(Google::Protobuf::FieldDescriptor) && descriptor.number == request.file_containing_extension.extension_number
+          result = GrpcReflection::FileDescriptorManager.find(request.file_containing_extension.containing_type)
+          res.file_descriptor_response = proto_module::FileDescriptorResponse.new(file_descriptor_proto: result)
+        else
+          res.file_descriptor_response = proto_module::FileDescriptorResponse.new(file_descriptor_proto: [])
+        end
       end
       [res].enum_for(:each)
     end

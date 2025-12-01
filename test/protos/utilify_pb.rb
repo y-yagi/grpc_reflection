@@ -6,9 +6,10 @@ require 'google/protobuf'
 
 require 'google/protobuf/timestamp_pb'
 require 'google/protobuf/descriptor_pb'
+require 'test/protos/enum_description_option_pb'
 
 
-descriptor_data = "\n\x19test/protos/utilify.proto\x12\x07utility\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/descriptor.proto\"\x0e\n\x0c\x43lockRequest\"6\n\nClockReply\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2<\n\x05\x43lock\x12\x33\n\x03Now\x12\x15.utility.ClockRequest\x1a\x13.utility.ClockReply\"\x00:3\n\tmy_option\x12\x1e.google.protobuf.MethodOptions\x18\xd1\x86\x03 \x01(\tb\x06proto3"
+descriptor_data = "\n\x19test/protos/utilify.proto\x12\x07utility\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/descriptor.proto\x1a)test/protos/enum_description_option.proto\"\x0e\n\x0c\x43lockRequest\"\xe3\x01\n\nClockReply\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12+\n\x04zone\x18\x02 \x01(\x0e\x32\x18.utility.ClockReply.ZoneH\x00\x88\x01\x01\"u\n\x04Zone\x12\"\n\x07UNKNOWN\x10\x00\x1a\x15\x92\xb5\x18\x11Unknown time zone\x12\'\n\x03UTC\x10\x01\x1a\x1e\x92\xb5\x18\x1a\x43oordinated Universal Time\x12 \n\x03JST\x10\x02\x1a\x17\x92\xb5\x18\x13Japan Standard TimeB\x07\n\x05_zone2<\n\x05\x43lock\x12\x33\n\x03Now\x12\x15.utility.ClockRequest\x1a\x13.utility.ClockReply\"\x00:3\n\tmy_option\x12\x1e.google.protobuf.MethodOptions\x18\xd1\x86\x03 \x01(\tb\x06proto3"
 
 pool = ::Google::Protobuf::DescriptorPool.generated_pool
 pool.add_serialized_file(descriptor_data)
@@ -16,4 +17,5 @@ pool.add_serialized_file(descriptor_data)
 module Utility
   ClockRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("utility.ClockRequest").msgclass
   ClockReply = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("utility.ClockReply").msgclass
+  ClockReply::Zone = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("utility.ClockReply.Zone").enummodule
 end
