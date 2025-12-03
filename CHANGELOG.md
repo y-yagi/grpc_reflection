@@ -1,3 +1,8 @@
+## 0.4.0
+
+* Support `file_containing_extension` request #14
+* Support message name requests #12
+
 ## 0.3.0
 
 * Support `file_by_filename` #9
