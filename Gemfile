@@ -6,8 +6,8 @@ source "https://rubygems.org"
 gemspec
 
 gem "irb"
-gem "rake", "~> 13.0"
-gem "minitest", "~> 5.16"
+gem "rake"
+gem "minitest"
 gem "minitest-hooks"
 gem "debug"
 gem "grpc-tools"
