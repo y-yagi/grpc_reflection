@@ -7,7 +7,7 @@ gemspec
 
 gem "irb"
 gem "rake"
-gem "minitest", "~> 5.16"
+gem "minitest"
 gem "minitest-hooks"
 gem "debug"
 gem "grpc-tools"
