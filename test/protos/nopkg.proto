@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service NoPkg {
+  rpc Ping (PingRequest) returns (PingReply) {}
+}
+
+message PingRequest {
+  string name = 1;
+}
+
+message PingReply {
+  string message = 1;
+}

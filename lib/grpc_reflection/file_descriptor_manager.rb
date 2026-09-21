@@ -41,12 +41,15 @@ module GrpcReflection
 
         search_name = name
         file_descriptor_proto = nil
-        while pos = search_name.rindex(".")
+        loop do
           descriptor = Google::Protobuf::DescriptorPool.generated_pool.lookup(search_name)
-          search_name = search_name.slice(0..(pos - 1))
-          next if descriptor.nil? || !descriptor.respond_to?(:file_descriptor)
-          file_descriptor_proto = descriptor.file_descriptor&.to_proto
-          break unless file_descriptor_proto.nil?
+          pos = search_name.rindex(".")
+          search_name = pos ? search_name.slice(0..(pos - 1)) : nil
+          unless descriptor.nil? || !descriptor.respond_to?(:file_descriptor)
+            file_descriptor_proto = descriptor.file_descriptor&.to_proto
+            break unless file_descriptor_proto.nil?
+          end
+          break if search_name.nil?
         end
 
         return nil if file_descriptor_proto.nil?
