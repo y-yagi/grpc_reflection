@@ -106,6 +106,42 @@ class TestGrpcReflection < Minitest::Test
     end
   end
 
+  def test_file_containing_symbol_by_nested_enum_name
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "utility.ClockReply.Zone")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/utilify.proto", parsed.name
+    end
+  end
+
+  def test_file_containing_symbol_by_field_name
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "utility.ClockReply.time")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/utilify.proto", parsed.name
+    end
+  end
+
+  def test_file_containing_symbol_for_well_known_type
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "google.protobuf.Timestamp")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "google/protobuf/timestamp.proto", parsed.name
+    end
+  end
+
   def test_file_containing_extension
     extension_requests = { v1: Grpc::Reflection::V1::ExtensionRequest, v1alpha: Grpc::Reflection::V1alpha::ExtensionRequest }
 
