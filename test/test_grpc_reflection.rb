@@ -191,14 +191,65 @@ class TestGrpcReflection < Minitest::Test
       extension_request = extension_requests[version].new(containing_type: "google.protobuf.EnumValueOptions", extension_number: 50001)
       request = @requests[version].new(file_containing_extension: extension_request)
       response = stub.server_reflection_info([request]).first
-      assert response.file_descriptor_response
-      assert_empty response.file_descriptor_response.file_descriptor_proto
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::NOT_FOUND, response.error_response.error_code
 
       extension_request = extension_requests[version].new(containing_type: "unknown.Type", extension_number: 50002)
       request = @requests[version].new(file_containing_extension: extension_request)
       response = stub.server_reflection_info([request]).first
-      assert response.file_descriptor_response
-      assert_empty response.file_descriptor_response.file_descriptor_proto
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::NOT_FOUND, response.error_response.error_code
+    end
+  end
+
+  def test_file_containing_symbol_not_found
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "helloworld.NoSuchSymbol")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::NOT_FOUND, response.error_response.error_code
+      assert_equal request, response.original_request
+    end
+  end
+
+  def test_file_by_filename_not_found
+    @versions.each do |version|
+      request = @requests[version].new(file_by_filename: "no/such/file.proto")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::NOT_FOUND, response.error_response.error_code
+    end
+  end
+
+  def test_file_by_filename_with_non_file_symbol
+    @versions.each do |version|
+      request = @requests[version].new(file_by_filename: "helloworld.HelloRequest")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::NOT_FOUND, response.error_response.error_code
+    end
+  end
+
+  def test_empty_request
+    @versions.each do |version|
+      request = @requests[version].new(host: "localhost")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      refute response.file_descriptor_response
+      assert response.error_response
+      assert_equal GRPC::Core::StatusCodes::INVALID_ARGUMENT, response.error_response.error_code
     end
   end
 
