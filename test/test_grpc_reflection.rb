@@ -12,22 +12,30 @@ class TestGrpcReflection < Minitest::Test
   include Minitest::Hooks
 
   def before_all
-    @hostname = "0.0.0.0:50051"
+    reader, writer = IO.pipe
     @server_pid = fork do
+      reader.close
       s = GRPC::RpcServer.new
-      s.add_http2_port(@hostname, :this_port_is_insecure)
+      port = s.add_http2_port("127.0.0.1:0", :this_port_is_insecure)
       s.handle(GrpcReflection::Server)
       s.handle(GrpcReflection::ServerAlpha)
       s.handle(GreeterServer)
       s.handle(UtilityServer)
       s.handle(NoPkgServer)
+      Thread.new do
+        s.wait_till_running
+        writer.puts(port)
+        writer.close
+      end
       s.run_till_terminated_or_interrupted([1, "int", "SIGTERM"])
     end
+    writer.close
+    @hostname = "127.0.0.1:#{reader.gets.to_i}"
+    reader.close
 
     @versions = %i[v1 v1alpha]
     @requests = {v1: Grpc::Reflection::V1::ServerReflectionRequest, v1alpha: Grpc::Reflection::V1alpha::ServerReflectionRequest}
     @stubs = {v1: Grpc::Reflection::V1::ServerReflection::Stub, v1alpha: Grpc::Reflection::V1alpha::ServerReflection::Stub}
-    sleep 0.5
   end
 
   def after_all
