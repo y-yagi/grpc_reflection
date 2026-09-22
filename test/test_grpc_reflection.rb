@@ -266,6 +266,61 @@ class TestGrpcReflection < Minitest::Test
     end
   end
 
+  def test_multiple_requests_in_one_call
+    @versions.each do |version|
+      list_services_request = @requests[version].new(list_services: "*")
+      file_containing_symbol_request = @requests[version].new(file_containing_symbol: "helloworld.Greeter")
+      file_by_filename_not_found_request = @requests[version].new(file_by_filename: "no/such/file.proto")
+
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      responses = stub.server_reflection_info([list_services_request, file_containing_symbol_request, file_by_filename_not_found_request]).to_a
+
+      assert_equal 3, responses.count
+
+      assert responses[0].list_services_response
+      assert_equal 5, responses[0].list_services_response.service.count
+
+      assert responses[1].file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(responses[1].file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/helloworld.proto", parsed.name
+
+      refute responses[2].file_descriptor_response
+      assert responses[2].error_response
+      assert_equal GRPC::Core::StatusCodes::NOT_FOUND, responses[2].error_response.error_code
+    end
+  end
+
+  def test_responses_are_interleaved_with_requests
+    @versions.each do |version|
+      list_services_request = @requests[version].new(list_services: "*")
+      file_containing_symbol_request = @requests[version].new(file_containing_symbol: "helloworld.Greeter")
+
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+
+      queue = Queue.new
+      queue << list_services_request
+
+      requests = Enumerator.new do |yielder|
+        2.times { yielder << queue.pop }
+      end
+
+      responses = stub.server_reflection_info(requests, deadline: Time.now + 5)
+
+      first_response = responses.next
+      assert first_response.list_services_response
+
+      # Only enqueue the second request after receiving the response for the
+      # first one. If the server waited for the request stream to be closed
+      # before responding, this would hang until the deadline is exceeded.
+      queue << file_containing_symbol_request
+
+      second_response = responses.next
+      assert second_response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(second_response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/helloworld.proto", parsed.name
+    end
+  end
+
   def test_all_extension_numbers_of_type
     @versions.each do |version|
       request = @requests[version].new(all_extension_numbers_of_type: ".")
