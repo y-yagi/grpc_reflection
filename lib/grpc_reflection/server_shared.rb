@@ -1,9 +1,12 @@
 module GrpcReflection
   module ServerShared
     def server_reflection_info_response(req, proto_module)
-      # TODO: support streaming call
-      request = req.first
+      req.lazy.map { |request| build_response(request, proto_module) }
+    end
 
+    private
+
+    def build_response(request, proto_module)
       res = proto_module::ServerReflectionResponse.new(original_request: request, valid_host: request.host)
       case request.message_request
       when :list_services
@@ -38,10 +41,8 @@ module GrpcReflection
       else
         res.error_response = error_response(proto_module, GRPC::Core::StatusCodes::INVALID_ARGUMENT, "invalid MessageRequest")
       end
-      [res].enum_for(:each)
+      res
     end
-
-    private
 
     def error_response(proto_module, error_code, error_message)
       proto_module::ErrorResponse.new(error_code: error_code, error_message: error_message)
