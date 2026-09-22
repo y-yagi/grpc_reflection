@@ -2,13 +2,12 @@
 
 module GrpcReflection
   module FileDescriptorManager
-    @@file_descriptor_decorators = []
+    @@file_descriptor_decorators = {}
 
     class << self
       def add(file_descriptor_proto)
-        decorator = GrpcReflection::FileDescriptorDecorator.new(file_descriptor_proto)
-        @@file_descriptor_decorators << decorator
-        decorator
+        filename = file_descriptor_proto.name
+        @@file_descriptor_decorators[filename] ||= GrpcReflection::FileDescriptorDecorator.new(file_descriptor_proto)
       end
 
       def find(name)
@@ -20,7 +19,7 @@ module GrpcReflection
         dependencies = file_descriptor.dependency.dup
         until dependencies.empty?
           dependency = dependencies.shift
-          decorated_file_descriptor = @@file_descriptor_decorators.detect { |f| f.filename == dependency }
+          decorated_file_descriptor = @@file_descriptor_decorators[dependency]
           if decorated_file_descriptor.nil? && proto = Google::Protobuf::DescriptorPool.generated_pool.lookup(dependency)&.to_proto
             decorated_file_descriptor = add(proto)
           end
@@ -37,7 +36,7 @@ module GrpcReflection
       private
 
       def find_file_descriptor(name)
-        file_descriptor = @@file_descriptor_decorators.detect { |f| f.dataset.include?(name) }
+        file_descriptor = @@file_descriptor_decorators.values.detect { |f| f.dataset.include?(name) }
         return file_descriptor if file_descriptor
 
         search_name = name
@@ -53,7 +52,6 @@ module GrpcReflection
         return nil if file_descriptor_proto.nil?
 
         add(file_descriptor_proto)
-        @@file_descriptor_decorators.detect { |f| f.dataset.include?(name) }
       end
     end
   end
