@@ -24,17 +24,23 @@ module GrpcReflection
     def set_dataset
       @file_descriptor_proto.service.each do |s|
         converted_service = JSON.parse(s.to_json)
-        @dataset.add(@file_descriptor_proto.package + "." + converted_service["name"])
+        @dataset.add(qualified_name(converted_service["name"]))
         converted_service["method"].each do |m|
-          @dataset.add(@file_descriptor_proto.package + "." + converted_service["name"] + "." + m["name"])
+          @dataset.add(qualified_name(converted_service["name"] + "." + m["name"]))
           @dataset.add(m["inputType"][1..])
           @dataset.add(m["outputType"][1..])
         end
       end
 
       @file_descriptor_proto.extension.each do |s|
-        @dataset.add(@file_descriptor_proto.package + "." + s.name)
+        @dataset.add(qualified_name(s.name))
       end
+    end
+
+    def qualified_name(name)
+      return name if @file_descriptor_proto.package.empty?
+
+      @file_descriptor_proto.package + "." + name
     end
   end
 end

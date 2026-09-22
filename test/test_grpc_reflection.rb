@@ -3,6 +3,7 @@
 require_relative "test_helper"
 require_relative "../test/protos/greeter_server"
 require_relative "../test/protos/utility_server"
+require_relative "../test/protos/nopkg_server"
 
 # load the client service into memory - we should not be adding this to our output
 require_relative '../test/protos/client_services_pb'
@@ -19,6 +20,7 @@ class TestGrpcReflection < Minitest::Test
       s.handle(GrpcReflection::ServerAlpha)
       s.handle(GreeterServer)
       s.handle(UtilityServer)
+      s.handle(NoPkgServer)
       s.run_till_terminated_or_interrupted([1, "int", "SIGTERM"])
     end
 
@@ -39,8 +41,8 @@ class TestGrpcReflection < Minitest::Test
       stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
       response = stub.server_reflection_info([request]).first
 
-      assert_equal 4, response.list_services_response.service.count
-      assert_equal ["grpc.reflection.v1.ServerReflection", "grpc.reflection.v1alpha.ServerReflection", "helloworld.Greeter", "utility.Clock"], response.list_services_response.service.map {|s| s.name }.sort
+      assert_equal 5, response.list_services_response.service.count
+      assert_equal ["NoPkg", "grpc.reflection.v1.ServerReflection", "grpc.reflection.v1alpha.ServerReflection", "helloworld.Greeter", "utility.Clock"], response.list_services_response.service.map {|s| s.name }.sort
     end
   end
 
@@ -78,6 +80,30 @@ class TestGrpcReflection < Minitest::Test
 
       parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
       assert_equal "test/protos/helloworld.proto", parsed.name
+    end
+  end
+
+  def test_file_containing_symbol_by_service_name_without_package
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "NoPkg")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/nopkg.proto", parsed.name
+    end
+  end
+
+  def test_file_containing_symbol_by_method_name_without_package
+    @versions.each do |version|
+      request = @requests[version].new(file_containing_symbol: "NoPkg.Ping")
+      stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
+      response = stub.server_reflection_info([request]).first
+
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/nopkg.proto", parsed.name
     end
   end
 
