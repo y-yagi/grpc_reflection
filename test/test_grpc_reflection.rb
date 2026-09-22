@@ -174,24 +174,27 @@ class TestGrpcReflection < Minitest::Test
     @versions.each do |version|
       stub = @stubs[version].new(@hostname, :this_channel_is_insecure)
 
-      # FIXME: This is for creating cache. It should be work without this.
-      dummy_request = @requests[version].new(file_containing_symbol: "utility.Clock")
-      stub.server_reflection_info([dummy_request]).first
-
-      extension_request = extension_requests[version].new(containing_type: "grpc_reflection.enum_description", extension_number: 50002)
+      extension_request = extension_requests[version].new(containing_type: "google.protobuf.EnumValueOptions", extension_number: 50002)
       request = @requests[version].new(file_containing_extension: extension_request)
       response = stub.server_reflection_info([request]).first
       assert response.file_descriptor_response
       parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
       assert_equal "test/protos/enum_description_option.proto", parsed.name
 
-      extension_request = extension_requests[version].new(containing_type: "grpc_reflection.enum_description", extension_number: 50001)
+      extension_request = extension_requests[version].new(containing_type: "google.protobuf.MethodOptions", extension_number: 50001)
+      request = @requests[version].new(file_containing_extension: extension_request)
+      response = stub.server_reflection_info([request]).first
+      assert response.file_descriptor_response
+      parsed = Google::Protobuf::FileDescriptorProto.decode(response.file_descriptor_response.file_descriptor_proto.first)
+      assert_equal "test/protos/utilify.proto", parsed.name
+
+      extension_request = extension_requests[version].new(containing_type: "google.protobuf.EnumValueOptions", extension_number: 50001)
       request = @requests[version].new(file_containing_extension: extension_request)
       response = stub.server_reflection_info([request]).first
       assert response.file_descriptor_response
       assert_empty response.file_descriptor_response.file_descriptor_proto
 
-      extension_request = extension_requests[version].new(containing_type: "grpc_reflection.enum_descriptio", extension_number: 50002)
+      extension_request = extension_requests[version].new(containing_type: "unknown.Type", extension_number: 50002)
       request = @requests[version].new(file_containing_extension: extension_request)
       response = stub.server_reflection_info([request]).first
       assert response.file_descriptor_response

@@ -6,7 +6,7 @@ require "google/protobuf/descriptor_pb"
 
 module GrpcReflection
   class FileDescriptorDecorator
-    attr_reader :dataset, :serialized_file, :filename, :dependency
+    attr_reader :dataset, :serialized_file, :filename, :dependency, :file_descriptor_proto
 
     def initialize(file_descriptor_proto)
       @file_descriptor_proto = file_descriptor_proto
