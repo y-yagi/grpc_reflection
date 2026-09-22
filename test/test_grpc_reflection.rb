@@ -22,6 +22,11 @@ class TestGrpcReflection < Minitest::Test
       s.handle(GreeterServer)
       s.handle(UtilityServer)
       s.handle(NoPkgServer)
+
+      decoy = GRPC::RpcServer.new
+      decoy.add_http2_port("127.0.0.1:0", :this_port_is_insecure)
+      decoy.handle(GreeterServer)
+
       Thread.new do
         s.wait_till_running
         writer.puts(port)

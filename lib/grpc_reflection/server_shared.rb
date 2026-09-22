@@ -48,7 +48,9 @@ module GrpcReflection
     end
 
     def main_server
-      @main_server ||= ObjectSpace.each_object(GRPC::RpcServer).to_a[0]
+      @main_server ||= ObjectSpace.each_object(GRPC::RpcServer).find do |server|
+        server.send(:rpc_handlers).values.any? { |handler| handler.receiver.equal?(self) }
+      end
     end
 
     def service_names
